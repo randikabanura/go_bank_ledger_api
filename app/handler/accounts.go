@@ -14,6 +14,9 @@ func GetAllAccounts(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	log.Print("GetAllAccounts")
 	var accounts []model.Account
 	db.Find(&accounts)
+	for i, _ := range accounts {
+		db.Model(accounts[i]).Related(&accounts[i].Customer)
+	}
 	respondJSON(w, http.StatusOK, accounts)
 }
 
@@ -36,6 +39,7 @@ func CreateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("GetAccount")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	account := getAccountOr404(db, id, w, r)
@@ -48,6 +52,7 @@ func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCustomerByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("GetCustomerByAccount")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var customer model.Customer
@@ -62,6 +67,7 @@ func GetCustomerByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("UpdateAccount")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	account := getAccountOr404(db, id, w, r)
@@ -82,6 +88,7 @@ func UpdateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("DeleteAccount")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	account := getAccountOr404(db, id, w, r)
@@ -97,13 +104,14 @@ func DeleteAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 //gets employee instance if exists or responds with 404 otherwise
 func getAccountOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Request) *model.Account {
-	log.Println("Test")
 	account := model.Account{}
 	uid, _ := uuid.FromString(id)
 	if err := db.First(&account, model.Account{ID: uid}).Error; err != nil {
 		respondError(w, http.StatusNotFound, err.Error())
 		return nil
 	}
+
+	db.Model(account).Related(&account.Customer)
 
 	return &account
 }

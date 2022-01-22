@@ -14,6 +14,11 @@ func GetAllCustomers(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	log.Print("GetAllCustomers")
 	var customers []model.Customer
 	db.Find(&customers)
+
+	for i, _ := range customers {
+		db.Model(customers[i]).Related(&customers[i].Accounts)
+	}
+
 	respondJSON(w, http.StatusOK, customers)
 }
 
@@ -36,18 +41,19 @@ func CreateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("GetCustomer")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	customer := getCustomerOr404(db, id, w, r)
 	if customer == nil {
 		return
 	}
-	log.Println("Count: ", db.Model(&customer).Association("Accounts").Count())
 
 	respondJSON(w, http.StatusOK, customer)
 }
 
 func GetAccountsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("GetAccountsByCustomer")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var accounts []model.Account
@@ -60,6 +66,7 @@ func GetAccountsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) 
 }
 
 func UpdateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("UpdateCustomer")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	customer := getCustomerOr404(db, id, w, r)
@@ -80,6 +87,7 @@ func UpdateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("DeleteCustomer")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	customer := getCustomerOr404(db, id, w, r)
@@ -103,7 +111,7 @@ func getCustomerOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Req
 		return nil
 	}
 
-	log.Println(&customer)
+	db.Model(customer).Related(&customer.Accounts)
 
 	return &customer
 }
