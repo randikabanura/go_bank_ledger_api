@@ -22,6 +22,16 @@ func CreateTransaction(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if transaction.TransactionType == "withdraw" || transaction.TransactionType == "transfer" {
+		account := transaction.Account
+		amount := transaction.Amount
+
+		if account.Amount < amount {
+			common.RespondError(w, http.StatusBadRequest, "Account does not have sufficient funds")
+			return
+		}
+	}
+
 	if err := db.Save(&transaction).Error; err != nil {
 		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
