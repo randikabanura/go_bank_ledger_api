@@ -37,11 +37,13 @@ func (a *App) setRoutes() {
 	a.Get("/api/v1/customers", a.GetAllCustomers)
 	a.Post("/api/v1/customers", a.CreateCustomer)
 	a.Get("/api/v1/customers/{id}", a.GetCustomer)
+	a.Get("/api/v1/customers/{id}/accounts", a.GetAccountsByCustomer)
 	a.Put("/api/v1/customers/{id}", a.UpdateCustomer)
 	a.Delete("/api/v1/customers/{id}", a.DeleteCustomer)
 	a.Get("/api/v1/accounts", a.GetAllAccounts)
 	a.Post("/api/v1/accounts", a.CreateAccount)
 	a.Get("/api/v1/accounts/{id}", a.GetAccount)
+	a.Get("/api/v1/accounts/{id}/customer", a.GetCustomerByAccount)
 	a.Put("/api/v1/accounts/{id}", a.UpdateAccount)
 	a.Delete("/api/v1/accounts/{id}", a.DeleteAccount)
 }
@@ -74,6 +76,10 @@ func (a *App) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	handler.GetCustomer(a.DB, w, r)
 }
 
+func (a *App) GetCustomerByAccount(w http.ResponseWriter, r *http.Request) {
+	handler.GetCustomerByAccount(a.DB, w, r)
+}
+
 func (a *App) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	handler.UpdateCustomer(a.DB, w, r)
 }
@@ -92,6 +98,10 @@ func (a *App) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) GetAccount(w http.ResponseWriter, r *http.Request) {
 	handler.GetAccount(a.DB, w, r)
+}
+
+func (a *App) GetAccountsByCustomer(w http.ResponseWriter, r *http.Request) {
+	handler.GetAccountsByCustomer(a.DB, w, r)
 }
 
 func (a *App) UpdateAccount(w http.ResponseWriter, r *http.Request) {

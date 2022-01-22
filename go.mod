@@ -8,6 +8,4 @@ require (
 	github.com/jinzhu/gorm v1.9.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.10 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
-	gorm.io/driver/sqlite v1.2.6 // indirect
-	gorm.io/gorm v1.22.5 // indirect
 )

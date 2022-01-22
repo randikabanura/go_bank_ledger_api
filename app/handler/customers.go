@@ -47,6 +47,18 @@ func GetCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, customer)
 }
 
+func GetAccountsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	var accounts []model.Account
+	customer := getCustomerOr404(db, id, w, r)
+	if customer == nil {
+		return
+	}
+	db.Model(&customer).Association("Accounts").Find(&accounts)
+	respondJSON(w, http.StatusOK, accounts)
+}
+
 func UpdateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
