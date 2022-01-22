@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bank_ledger_api/app/handler/common"
 	"bank_ledger_api/model"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -17,7 +18,7 @@ func GetAllAccounts(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	for i, _ := range accounts {
 		db.Model(accounts[i]).Related(&accounts[i].Customer)
 	}
-	respondJSON(w, http.StatusOK, accounts)
+	common.RespondJSON(w, http.StatusOK, accounts)
 }
 
 func CreateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -26,16 +27,16 @@ func CreateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&account); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		common.RespondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer r.Body.Close()
 
 	if err := db.Save(&account).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusCreated, account)
+	common.RespondJSON(w, http.StatusCreated, account)
 }
 
 func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -47,8 +48,7 @@ func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Count: ", db.Model(&account).Association("Customer").Count())
-	respondJSON(w, http.StatusOK, account)
+	common.RespondJSON(w, http.StatusOK, account)
 }
 
 func GetCustomerByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -63,7 +63,7 @@ func GetCustomerByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 	db.Model(&account).Association("Customer").Find(&customer)
 
-	respondJSON(w, http.StatusOK, customer)
+	common.RespondJSON(w, http.StatusOK, customer)
 }
 
 func UpdateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -76,15 +76,15 @@ func UpdateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&account); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		common.RespondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer r.Body.Close()
 	if err := db.Save(&account).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusOK, account)
+	common.RespondJSON(w, http.StatusOK, account)
 }
 
 func DeleteAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -96,10 +96,10 @@ func DeleteAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := db.Delete(&account).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusNoContent, nil)
+	common.RespondJSON(w, http.StatusNoContent, nil)
 }
 
 //gets employee instance if exists or responds with 404 otherwise
@@ -107,7 +107,7 @@ func getAccountOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Requ
 	account := model.Account{}
 	uid, _ := uuid.FromString(id)
 	if err := db.First(&account, model.Account{ID: uid}).Error; err != nil {
-		respondError(w, http.StatusNotFound, err.Error())
+		common.RespondError(w, http.StatusNotFound, err.Error())
 		return nil
 	}
 

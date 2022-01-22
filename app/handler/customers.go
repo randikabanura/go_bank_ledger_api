@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bank_ledger_api/app/handler/common"
 	"bank_ledger_api/model"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -19,7 +20,7 @@ func GetAllCustomers(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		db.Model(customers[i]).Related(&customers[i].Accounts)
 	}
 
-	respondJSON(w, http.StatusOK, customers)
+	common.RespondJSON(w, http.StatusOK, customers)
 }
 
 func CreateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -28,16 +29,16 @@ func CreateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&customer); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		common.RespondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer r.Body.Close()
 
 	if err := db.Save(&customer).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusCreated, customer)
+	common.RespondJSON(w, http.StatusCreated, customer)
 }
 
 func GetCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -49,7 +50,7 @@ func GetCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, customer)
+	common.RespondJSON(w, http.StatusOK, customer)
 }
 
 func GetAccountsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -62,7 +63,7 @@ func GetAccountsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	db.Model(&customer).Association("Accounts").Find(&accounts)
-	respondJSON(w, http.StatusOK, accounts)
+	common.RespondJSON(w, http.StatusOK, accounts)
 }
 
 func UpdateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -75,15 +76,15 @@ func UpdateCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&customer); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		common.RespondJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer r.Body.Close()
 	if err := db.Save(&customer).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusOK, customer)
+	common.RespondJSON(w, http.StatusOK, customer)
 }
 
 func DeleteCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -95,10 +96,10 @@ func DeleteCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := db.Delete(&customer).Error; err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		common.RespondJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusNoContent, nil)
+	common.RespondJSON(w, http.StatusNoContent, nil)
 }
 
 //gets employee instance if exists or responds with 404 otherwise
@@ -107,7 +108,7 @@ func getCustomerOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Req
 	//var accounts []model.Account
 	uid, _ := uuid.FromString(id)
 	if err := db.First(&customer, model.Customer{ID: uid}).Error; err != nil {
-		respondError(w, http.StatusNotFound, err.Error())
+		common.RespondError(w, http.StatusNotFound, err.Error())
 		return nil
 	}
 
