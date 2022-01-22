@@ -102,10 +102,9 @@ func DeleteCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	common.RespondJSON(w, http.StatusNoContent, nil)
 }
 
-//gets employee instance if exists or responds with 404 otherwise
+//gets customer instance if exists or responds with 404 otherwise
 func getCustomerOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Request) *model.Customer {
 	customer := model.Customer{}
-	//var accounts []model.Account
 	uid, _ := uuid.FromString(id)
 	if err := db.First(&customer, model.Customer{ID: uid}).Error; err != nil {
 		common.RespondError(w, http.StatusNotFound, err.Error())

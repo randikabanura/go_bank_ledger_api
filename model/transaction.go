@@ -1,6 +1,8 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
 	"time"
@@ -24,4 +26,37 @@ type Transaction struct {
 func (transaction *Transaction) BeforeCreate(scope *gorm.Scope) error {
 	uuidV4 := uuid.NewV4()
 	return scope.SetColumn("ID", uuidV4)
+}
+
+func (transaction *Transaction) BeforeSave() (err error) {
+	if transaction.TransactionType != "withdraw" && transaction.TransactionType != "transfer" && transaction.TransactionType != "deposit" {
+		err = errors.New("can't save without a correct transaction_type")
+	}
+
+	if transaction.TransactionType == "transfer" && fmt.Sprint(transaction.ToAccountID) == "" {
+		err = errors.New("can't save without a to_account_id for transaction_type 'transfer'")
+	}
+	return
+}
+
+func (transaction Transaction) AfterCreate(db *gorm.DB) (err error) {
+	if transaction.TransactionType == "withdraw" || transaction.TransactionType == "transfer" {
+		var account Account
+		db.Model(&transaction).Association("Account").Find(&account)
+		account.Amount -= transaction.Amount
+		db.Save(&account)
+		if transaction.TransactionType == "transfer" {
+			var toAccount Account
+			db.Model(&transaction).Association("ToAccount").Find(&toAccount)
+			toAccount.Amount += transaction.Amount
+			db.Save(&toAccount)
+		}
+	} else {
+		var account Account
+		db.Model(&transaction).Association("Account").Find(&account)
+		account.Amount += transaction.Amount
+		db.Save(&account)
+	}
+
+	return
 }

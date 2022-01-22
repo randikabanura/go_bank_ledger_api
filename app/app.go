@@ -46,6 +46,8 @@ func (a *App) setRoutes() {
 	a.Get("/api/v1/accounts/{id}/customer", a.GetCustomerByAccount)
 	a.Put("/api/v1/accounts/{id}", a.UpdateAccount)
 	a.Delete("/api/v1/accounts/{id}", a.DeleteAccount)
+	a.Post("/api/v1/transactions", a.CreateTransaction)
+	a.Get("/api/v1/transactions/{id}", a.GetTransaction)
 }
 
 func (a *App) Get(path string, f func(w http.ResponseWriter, r *http.Request)) {
@@ -110,6 +112,14 @@ func (a *App) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	handler.DeleteAccount(a.DB, w, r)
+}
+
+func (a *App) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+	handler.CreateTransaction(a.DB, w, r)
+}
+
+func (a *App) GetTransaction(w http.ResponseWriter, r *http.Request) {
+	handler.GetTransaction(a.DB, w, r)
 }
 
 func (a *App) Run(host string) {

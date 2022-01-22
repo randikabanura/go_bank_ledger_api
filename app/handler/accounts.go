@@ -102,7 +102,7 @@ func DeleteAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	common.RespondJSON(w, http.StatusNoContent, nil)
 }
 
-//gets employee instance if exists or responds with 404 otherwise
+//gets account instance if exists or responds with 404 otherwise
 func getAccountOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Request) *model.Account {
 	account := model.Account{}
 	uid, _ := uuid.FromString(id)
