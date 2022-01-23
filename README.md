@@ -8,7 +8,7 @@ and a sample bank ledger API which can create accounts, customers and transactio
 - Simple authentication system
 - Multiple accounts per one customer
 - Can deposit, withdraw, transfer funds to accounts
-- Transaction story as per account or customer
+- Transaction history as per account or customer
 - You can view API documentation of the application by clicking [here](https://documenter.getpostman.com/view/7109068/UVXqDsPN).
 
 ## License
