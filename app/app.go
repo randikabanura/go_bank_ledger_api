@@ -4,6 +4,7 @@ import (
 	"bank_ledger_api/app/handler"
 	"bank_ledger_api/app/handler/common"
 	"bank_ledger_api/config"
+	"bank_ledger_api/database"
 	"bank_ledger_api/model"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -28,7 +29,7 @@ func (a *App) Initialize(config *config.Config) {
 	if err != nil {
 		log.Fatal("Could not connect database", err)
 	}
-	a.DB = model.DBMigrate(db)
+	a.DB = database.DBMigrate(db)
 	a.Router = mux.NewRouter()
 	a.setRoutes()
 }
