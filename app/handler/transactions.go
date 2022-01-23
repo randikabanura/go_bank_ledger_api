@@ -22,8 +22,11 @@ func CreateTransaction(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	transaction.CustomerID, _ = model.ExtractTokenID(r)
+
 	if transaction.TransactionType == "withdraw" || transaction.TransactionType == "transfer" {
-		account := transaction.Account
+		var account model.Account
+		db.Where("id = ?", transaction.AccountID).First(&account)
 		amount := transaction.Amount
 
 		if account.Amount < amount {
@@ -36,6 +39,11 @@ func CreateTransaction(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	db.Model(transaction).Related(&transaction.Customer)
+	db.Model(transaction).Related(&transaction.Account)
+	db.Model(transaction).Related(&transaction.ToAccount)
+
 	common.RespondJSON(w, http.StatusCreated, transaction)
 }
 
@@ -47,6 +55,10 @@ func GetTransaction(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if transaction == nil {
 		return
 	}
+
+	db.Model(transaction).Related(&transaction.Customer)
+	db.Model(transaction).Related(&transaction.Account)
+	db.Model(transaction).Related(&transaction.ToAccount)
 
 	common.RespondJSON(w, http.StatusOK, transaction)
 }

@@ -32,6 +32,8 @@ func CreateAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	account.CustomerID, _ = model.ExtractTokenID(r)
+
 	if err := db.Save(&account).Error; err != nil {
 		common.RespondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -49,6 +51,33 @@ func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	common.RespondJSON(w, http.StatusOK, account)
+}
+
+func GetTransactionsByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	log.Print("GetAccount")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	account := getAccountOr404(db, id, w, r)
+	if account == nil {
+		return
+	}
+
+	var transactions []model.Transaction
+	var toTransactions []model.Transaction
+	db.Model(account).Association("Transactions").Find(&transactions)
+	db.Model(account).Association("ToTransactions").Find(&toTransactions)
+
+	for i, _ := range transactions {
+		db.Model(transactions[i]).Related(&transactions[i].Account)
+		db.Model(transactions[i]).Related(&transactions[i].ToAccount)
+	}
+
+	for j, _ := range toTransactions {
+		db.Model(toTransactions[j]).Related(&toTransactions[j].ToAccount)
+		db.Model(toTransactions[j]).Related(&toTransactions[j].Account)
+	}
+
+	common.RespondJSON(w, http.StatusOK, append(transactions, toTransactions...))
 }
 
 func GetCustomerByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
