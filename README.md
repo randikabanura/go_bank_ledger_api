@@ -5,7 +5,7 @@ and a sample bank ledger API which can create accounts, customers and transactio
 
 ## Features
 
-- Extensive authentication system
+- Simple authentication system
 - Multiple accounts per one customer
 - Can deposit, withdraw, transfer funds to accounts
 - Transaction story as per account or customer
