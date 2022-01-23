@@ -89,7 +89,7 @@ func GetCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTransactionsByCustomer(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
-	log.Print("GetTransaction")
+	log.Print("GetTransactionsByCustomer")
 	customerId, err := model.ExtractTokenID(r)
 	if err != nil {
 		common.RespondJSON(w, http.StatusBadRequest, err.Error())

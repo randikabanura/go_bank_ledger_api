@@ -54,7 +54,7 @@ func GetAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTransactionsByAccount(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
-	log.Print("GetAccount")
+	log.Print("GetTransactionsByAccount")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	account := getAccountOr404(db, id, w, r)
