@@ -40,23 +40,25 @@ func (transaction *Transaction) BeforeSave() (err error) {
 }
 
 func (transaction Transaction) AfterCreate(db *gorm.DB) (err error) {
-	if transaction.TransactionType == "withdraw" || transaction.TransactionType == "transfer" {
-		var account Account
-		db.Model(&transaction).Association("Account").Find(&account)
-		account.Amount -= transaction.Amount
-		db.Save(&account)
-		if transaction.TransactionType == "transfer" {
-			var toAccount Account
-			db.Model(&transaction).Association("ToAccount").Find(&toAccount)
-			toAccount.Amount += transaction.Amount
-			db.Save(&toAccount)
+	return db.Transaction(func(tx *gorm.DB) error {
+		if transaction.TransactionType == "withdraw" || transaction.TransactionType == "transfer" {
+			var account Account
+			db.Model(&transaction).Association("Account").Find(&account)
+			account.Amount -= transaction.Amount
+			db.Save(&account)
+			if transaction.TransactionType == "transfer" {
+				var toAccount Account
+				db.Model(&transaction).Association("ToAccount").Find(&toAccount)
+				toAccount.Amount += transaction.Amount
+				db.Save(&toAccount)
+			}
+		} else {
+			var account Account
+			db.Model(&transaction).Association("Account").Find(&account)
+			account.Amount += transaction.Amount
+			db.Save(&account)
 		}
-	} else {
-		var account Account
-		db.Model(&transaction).Association("Account").Find(&account)
-		account.Amount += transaction.Amount
-		db.Save(&account)
-	}
 
-	return
+		return nil
+	})
 }
